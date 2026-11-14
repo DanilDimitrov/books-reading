@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import ActiveTrainingDashboard from './ActiveTrainingDashboard';
+import { LibraryList } from './components/LibraryList/LibraryList';
 import { getLocalDateString } from './dateUtils';
 import { getBooks, getTraining, saveTraining, type Book, type Training } from './mockApi';
 import './App.css';
@@ -137,11 +138,17 @@ function App() {
   const [books, setBooks] = useState<Book[]>([]);
   const [training, setTraining] = useState<Training | null>(null);
   const [loadError, setLoadError] = useState('');
+  const [currentView, setCurrentView] = useState<'library' | 'setup'>('library');
 
   useEffect(() => {
     try {
-      setBooks(getBooks());
-      setTraining(getTraining());
+      const loadedBooks = getBooks();
+      const loadedTraining = getTraining();
+      setBooks(loadedBooks);
+      setTraining(loadedTraining);
+      if (loadedTraining?.active) {
+        setCurrentView('library');
+      }
     } catch (error) {
       setLoadError(
         error instanceof Error ? error.message : 'Не вдалося завантажити дані тренування.',
@@ -154,6 +161,8 @@ function App() {
     setBooks(getBooks());
   }
 
+  const planningBooks = books.filter((book) => book.status === 'planned');
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -164,10 +173,14 @@ function App() {
           <span className="avatar" aria-hidden="true">
             М
           </span>
-          <span>Моє читання</span>
+          <span>Макс Меленчук</span>
         </div>
         <span className="header-caption">
-          {training?.active ? 'Активне тренування' : 'Планування читання'}
+          {training?.active
+            ? 'Активне тренування'
+            : currentView === 'setup'
+              ? 'Планування читання'
+              : 'Бібліотека'}
         </span>
       </header>
 
@@ -184,8 +197,14 @@ function App() {
           books={books}
           onBooksChange={setBooks}
         />
-      ) : (
+      ) : currentView === 'setup' ? (
         <TrainingSetup books={books} onStart={handleStart} />
+      ) : (
+        <LibraryList
+          books={books}
+          onBooksChange={setBooks}
+          onNext={() => setCurrentView('setup')}
+        />
       )}
     </div>
   );
