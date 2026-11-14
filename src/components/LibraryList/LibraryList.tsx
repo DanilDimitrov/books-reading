@@ -1,95 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { type Book, updateBook } from '../../mockApi';
 import './LibraryList.css';
 
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  year: number;
-  pages: number;
-  status: 'finished' | 'reading' | 'planning';
-  rating?: number;
-  resume?: string;
+interface LibraryListProps {
+  books: Book[];
+  onBooksChange: (books: Book[]) => void;
+  onNext: () => void;
 }
 
-export const LibraryList: React.FC = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [books, setBooks] = useState<Book[]>([]);
-
-  // Поля форми для додавання книги
+export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, onNext }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [year, setYear] = useState('');
   const [pages, setPages] = useState('');
-
-  useEffect(() => {
-    const fetchBooks = () => {
-      try {
-        const savedBooks: Book[] = [
-          {
-            id: '1',
-            title: 'Психобольница в руках пациентов...',
-            author: 'Купер Алан',
-            year: 2009,
-            pages: 183,
-            status: 'finished',
-            rating: 4,
-          },
-          {
-            id: '2',
-            title: 'Разработка ценностных предложений.',
-            author: 'Алекс Остервальдер, Ив Пинье',
-            year: 2013,
-            pages: 368,
-            status: 'reading',
-          },
-          {
-            id: '3',
-            title: 'Scrum. Революционный метод...',
-            author: 'Джефф Сазерленд',
-            year: 2014,
-            pages: 25,
-            status: 'planning',
-          },
-        ];
-        setBooks(savedBooks);
-      } catch (error) {
-        console.error('Помилка завантаження книг:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, []);
 
   const handleAddBook = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !author || !year || !pages) return;
 
     const newBook: Book = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title,
       author,
       year: Number(year),
-      pages: Number(pages),
-      status: 'planning',
+      totalPages: Number(pages),
+      status: 'planned',
     };
 
-    setBooks([...books, newBook]);
+    const updated = [...books, newBook];
+    onBooksChange(updated);
     setTitle('');
     setAuthor('');
     setYear('');
     setPages('');
   };
 
-  const finishedBooks = books.filter((book) => book.status === 'finished');
+  const finishedBooks = books.filter((book) => book.status === 'read');
   const readingBooks = books.filter((book) => book.status === 'reading');
-  const planningBooks = books.filter((book) => book.status === 'planning');
-
-  if (isLoading) {
-    return <div className="loading-container">Завантаження бібліотеки...</div>;
-  }
+  const planningBooks = books.filter((book) => book.status === 'planned');
 
   return (
     <div className="library-container">
@@ -174,7 +122,7 @@ export const LibraryList: React.FC = () => {
                       <td className="table-td">📖 {book.title}</td>
                       <td className="table-td">{book.author}</td>
                       <td className="table-td">{book.year}</td>
-                      <td className="table-td">{book.pages}</td>
+                      <td className="table-td">{book.totalPages}</td>
                       <td className="table-td book-rating">
                         {'★'.repeat(book.rating || 0)}
                         {'☆'.repeat(5 - (book.rating || 0))}
@@ -208,7 +156,7 @@ export const LibraryList: React.FC = () => {
                       <td className="table-td book-title-reading">📙 {book.title}</td>
                       <td className="table-td">{book.author}</td>
                       <td className="table-td">{book.year}</td>
-                      <td className="table-td">{book.pages}</td>
+                      <td className="table-td">{book.totalPages}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -235,7 +183,7 @@ export const LibraryList: React.FC = () => {
                       <td className="table-td">📖 {book.title}</td>
                       <td className="table-td">{book.author}</td>
                       <td className="table-td">{book.year}</td>
-                      <td className="table-td">{book.pages}</td>
+                      <td className="table-td">{book.totalPages}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -246,7 +194,9 @@ export const LibraryList: React.FC = () => {
           {/* Кнопка "Далі" */}
           {planningBooks.length > 0 && (
             <div className="next-button-container">
-              <button className="next-btn">Далі</button>
+              <button className="next-btn" onClick={onNext}>
+                Далі
+              </button>
             </div>
           )}
         </>
