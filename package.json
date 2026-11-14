@@ -13,7 +13,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "chart.js": "^4.6.1",
     "react": "^19.3.1",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
@@ -31,5 +33,18 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.6"
-  }
+  },
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DanilDimitrov/books-reading.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DanilDimitrov/books-reading/issues"
+  },
+  "homepage": "https://github.com/DanilDimitrov/books-reading#readme"
 }
