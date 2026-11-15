@@ -1,0 +1,92 @@
+.inputWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  font-family: var(--font-main);
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-light-text);
+}
+
+.inputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: inherit;
+  border: 1px solid var(--color-gray-border);
+}
+
+.inputContainer:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(255, 107, 1, 0.15);
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: var(--color-gray-border);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-gray-border);
+}
+
+.withLeftIcon {
+  padding-left: 40px;
+}
+
+.withRightIcon {
+  padding-right: 40px;
+}
+
+.iconLeft,
+.iconRight {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #828282;
+  width: 40px;
+  height: 100%;
+  pointer-events: none; /* Щоб клік проходив крізь іконку на сам інпут */
+}
+
+.iconLeft {
+  left: 0;
+}
+
+.iconRight {
+  right: 0;
+}
+
+.errorState {
+  border-color: var(--color-error);
+}
+
+
+.errorMessage {
+  font-size: 12px;
+  color: var(--color-error);
+  margin-top: 2px;
+}
+
+.disabledState {
+  background-color: inherit;
+  border-color: var(--color-gray-border);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.disabledState input {
+  cursor: not-allowed;
+}

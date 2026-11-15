@@ -1,0 +1,54 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: var(--font-main);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #242424);
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--color-grey-border);
+  border-radius: 8px;
+  background-color: inherit;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: var(--color-text);
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.textarea:focus-within {
+  border-color: var(--color-primary);
+}
+
+.textarea::placeholder {
+  color: var(--color-text);
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 10px;
+}

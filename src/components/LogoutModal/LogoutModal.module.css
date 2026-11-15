@@ -1,0 +1,22 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 10px 0;
+  font-family: var(--font-main);
+  text-align: center;
+}
+
+.text {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}

@@ -1,0 +1,21 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 10px 0;
+  text-align: center;
+  font-family: var(--font-main);
+}
+
+.text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+}

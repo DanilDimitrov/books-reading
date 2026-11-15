@@ -1,0 +1,52 @@
+/* Базові стилі для всіх кнопок */
+.button {
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* main */
+.primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  width: 130px;
+  height: 40px;
+  border: none;
+}
+
+.primary:hover {
+  background-color: var(--color-primary-hover, #e55f00);
+}
+
+/* with grey backgraund */
+.secondary {
+  background-color: inherit;
+  color: var(--color-text);
+  border:1px solid var(--color-text);
+  width: 130px;
+  height: 40px;
+}
+
+.secondary:hover {
+  background-color: var(--color-light-text);
+}
+
+/* without background, only border */
+.grey {
+  background-color:  var(--color-dark-grey);
+  border: none;
+  color: var(--color-white);
+}
+
+.disabled,
+.button:disabled {
+  background-color: var(--color-white);
+  color: var(--color-text);
+  border:1px solid var(--color-text);
+  cursor: not-allowed;
+}
