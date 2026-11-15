@@ -23,19 +23,49 @@ function TrainingSetup({
   const today = getLocalDateString(new Date());
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(getDefaultEndDate);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  
+  const [selectedBooks, setSelectedBooks] = useState<Book[]>([]);
+  const [selectedBookId, setSelectedBookId] = useState('');
+  
   const [error, setError] = useState('');
 
-  function toggleBook(bookId: string) {
-    setSelectedIds((ids) =>
-      ids.includes(bookId) ? ids.filter((id) => id !== bookId) : [...ids, bookId],
-    );
+  const availableBooks = books.filter(
+    (book) => book.status !== 'read' && !selectedBooks.some((selected) => selected.id === book.id)
+  );
+
+  function handleAddBook() {
+    if (!selectedBookId) return;
+    const bookToAdd = books.find((book) => book.id === selectedBookId);
+    if (!bookToAdd) return;
+
+    if (selectedBooks.some((book) => book.id === bookToAdd.id)) {
+      return;
+    }
+
+    setSelectedBooks((prev) => [...prev, bookToAdd]);
+    setSelectedBookId('');
   }
+
+  function handleRemoveBook(bookId: string) {
+    setSelectedBooks((prev) => prev.filter((book) => book.id !== bookId));
+  }
+
+  const calculateDays = (start: string, end: string) => {
+    if (!start || !end) return 0;
+    const startMs = new Date(start).getTime();
+    const endMs = new Date(end).getTime();
+    const diffTime = endMs - startMs;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  const totalBooksCount = selectedBooks.length;
+  const totalDays = calculateDays(startDate, endDate);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
-    if (!selectedIds.length) {
+    if (!selectedBooks.length) {
       setError('Оберіть щонайменше одну книгу для тренування.');
       return;
     }
@@ -50,7 +80,7 @@ function TrainingSetup({
       id: crypto.randomUUID(),
       startDate,
       endDate,
-      bookIds: selectedIds,
+      bookIds: selectedBooks.map((book) => book.id),
       active: true,
     };
     try {
@@ -61,7 +91,7 @@ function TrainingSetup({
     }
   }
 
-  const availableBooks = books.filter((book) => book.status !== 'read');
+  const unreadBooks = books.filter((book) => book.status !== 'read');
 
   return (
     <main className="page-content setup-page">
@@ -94,28 +124,79 @@ function TrainingSetup({
             </label>
           </div>
 
-          <div className="setup-book-list">
-            <h2>Книги для читання</h2>
-            {availableBooks.length ? (
-              availableBooks.map((book) => (
-                <label className="selectable-book" key={book.id}>
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.includes(book.id)}
-                    onChange={() => toggleBook(book.id)}
-                  />
-                  <span className="book-option-copy">
-                    <strong>{book.title}</strong>
-                    <span>
-                      {book.author} · {book.year}
-                    </span>
-                  </span>
-                  <span className="book-pages">{book.totalPages} стор.</span>
-                </label>
-              ))
+          <div className="setup-book-selection" style={{ marginTop: '20px' }}>
+            <label>
+              Оберіть книгу
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                <select
+                  value={selectedBookId}
+                  onChange={(event) => setSelectedBookId(event.target.value)}
+                  style={{ flex: 1, padding: '8px' }}
+                >
+                  <option value="">-- Оберіть книгу з бібліотеки --</option>
+                  {availableBooks.map((book) => (
+                    <option key={book.id} value={book.id}>
+                      {book.title} ({book.author}, {book.totalPages} стор.)
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  onClick={handleAddBook}
+                  disabled={!selectedBookId}
+                >
+                  Додати
+                </button>
+              </div>
+            </label>
+          </div>
+
+          <div className="selected-books-section" style={{ marginTop: '20px' }}>
+            <h2>Обрані книги для тренування</h2>
+            {selectedBooks.length === 0 ? (
+              <p className="empty-state">Список обраних книг порожній.</p>
             ) : (
-              <p className="empty-state">Усі книги прочитані. Додайте нові книги до бібліотеки.</p>
+              <ul className="books-list" style={{ listStyle: 'none', padding: 0 }}>
+                {selectedBooks.map((book) => (
+                  <li
+                    key={book.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 0',
+                      borderBottom: '1px solid #eee',
+                    }}
+                  >
+                    <span>
+                      <strong>{book.title}</strong> — {book.author} ({book.totalPages} стор.)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveBook(book.id)}
+                      className="delete-btn"
+                      aria-label="Видалити книгу"
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                    >
+                      🗑️
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
+          </div>
+
+          <div className="goal-widget" style={{ margin: '20px 0', padding: '15px', background: '#f9f9f9', borderRadius: '8px' }}>
+            <h3>Моя мета прочитати</h3>
+            <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+              <div>
+                <strong>{totalBooksCount}</strong> <span>книжжок</span>
+              </div>
+              <div>
+                <strong>{totalDays}</strong> <span>днів</span>
+              </div>
+            </div>
           </div>
 
           {error && (
@@ -126,7 +207,7 @@ function TrainingSetup({
           <button
             className="button button-primary setup-submit"
             type="submit"
-            disabled={!availableBooks.length}
+            disabled={!unreadBooks.length || selectedBooks.length === 0}
           >
             Почати тренування
           </button>
