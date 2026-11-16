@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { type Book, updateBook } from '../../mockApi';
+import { Modal } from '../Modal/Modal'; 
+import { BooksRating } from '../BooksRating/BooksRating'; 
+import { Button } from '../Button/Button'; 
 import './LibraryList.css';
 
 interface LibraryListProps {
@@ -14,6 +17,45 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
   const [year, setYear] = useState('');
   const [pages, setPages] = useState('');
 
+
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [rating, setRating] = useState<number>(0);
+  const [review, setReview] = useState<string>('');
+
+
+  const handleOpenModal = (book: Book) => {
+    setSelectedBook(book);
+    setRating(book.rating || 0);
+
+    const savedReview = localStorage.getItem(`review_${book.id}`) || book.review || '';
+    setReview(savedReview);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedBook(null);
+    setRating(0);
+    setReview('');
+  };
+
+
+  const handleSaveReview = () => {
+    if (!selectedBook) return;
+
+
+    localStorage.setItem(`review_${selectedBook.id}`, review);
+
+
+    const updatedBooks = books.map((b) => {
+      if (b.id === selectedBook.id) {
+        return { ...b, rating: rating, review: review };
+      }
+      return b;
+    });
+
+    onBooksChange(updatedBooks);
+    handleCloseModal();
+  };
+
   const handleAddBook = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !author || !year || !pages) return;
@@ -25,6 +67,7 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
       year: Number(year),
       totalPages: Number(pages),
       status: 'planned',
+      review
     };
 
     const updated = [...books, newBook];
@@ -41,7 +84,7 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
 
   return (
     <div className="library-container">
-      {/* Форма додавання книги */}
+
       <form onSubmit={handleAddBook} className="library-form">
         <div className="form-group">
           <label className="form-label">Назва книги</label>
@@ -88,7 +131,6 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
         </button>
       </form>
 
-      {/* Якщо бібліотека порожня */}
       {books.length === 0 ? (
         <div className="empty-library">
           <h3 className="empty-title">Крок 1.</h3>
@@ -101,7 +143,7 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
         </div>
       ) : (
         <>
-          {/* Секція: Прочитано */}
+
           {finishedBooks.length > 0 && (
             <section className="library-section">
               <h2 className="section-title">Прочитано</h2>
@@ -119,16 +161,31 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
                 <tbody>
                   {finishedBooks.map((book) => (
                     <tr key={book.id} className="table-row">
-                      <td className="table-td">📖 {book.title}</td>
+                      {/* Робимо назву клікабельною для відкриття модалки */}
+                      <td 
+                        className="table-td" 
+                        style={{ cursor: 'pointer', color: '#FF6B01' }}
+                        onClick={() => handleOpenModal(book)}
+                      >
+                        📖 {book.title}
+                      </td>
                       <td className="table-td">{book.author}</td>
                       <td className="table-td">{book.year}</td>
                       <td className="table-td">{book.totalPages}</td>
                       <td className="table-td book-rating">
-                        {'★'.repeat(book.rating || 0)}
-                        {'☆'.repeat(5 - (book.rating || 0))}
+                        {book.rating ? (
+                          <>
+                            {'★'.repeat(book.rating)}
+                            {'☆'.repeat(5 - book.rating)}
+                          </>
+                        ) : (
+                          <span style={{ color: '#a6abb9' }}>Рейтинг відсутній</span>
+                        )}
                       </td>
                       <td className="table-td">
-                        <button className="resume-btn">Резюме</button>
+                        <button className="resume-btn" onClick={() => handleOpenModal(book)}>
+                          Резюме
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -137,7 +194,6 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
             </section>
           )}
 
-          {/* Секція: Читаю */}
           {readingBooks.length > 0 && (
             <section className="library-section">
               <h2 className="section-title">Читаю</h2>
@@ -164,7 +220,6 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
             </section>
           )}
 
-          {/* Секція: Маю намір прочитати */}
           {planningBooks.length > 0 && (
             <section className="library-section">
               <h2 className="section-title">Маю намір прочитати</h2>
@@ -191,7 +246,7 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
             </section>
           )}
 
-          {/* Кнопка "Далі" */}
+
           {planningBooks.length > 0 && (
             <div className="next-button-container">
               <button className="next-btn" onClick={onNext}>
@@ -200,6 +255,48 @@ export const LibraryList: React.FC<LibraryListProps> = ({ books, onBooksChange, 
             </div>
           )}
         </>
+      )}
+
+
+      {selectedBook && (
+        <Modal isOpen={!!selectedBook} onClose={handleCloseModal}>
+          <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <p style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>Обрати рейтинг книги</p>
+            
+
+            <BooksRating 
+              rating={rating} 
+              onRatingChange={(newRating) => setRating(newRating)} 
+            />
+
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Резюме</p>
+              <textarea
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+                placeholder="..."
+                rows={5}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '4px',
+                  border: '1px solid #a6abb9',
+                  resize: 'none',
+                  fontFamily: 'inherit',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '10px' }}>
+              <Button variant="secondary" onClick={handleCloseModal}>
+                Назад
+              </Button>
+              <Button variant="primary" onClick={handleSaveReview}>
+                Зберегти
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

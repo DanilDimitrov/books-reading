@@ -9,6 +9,7 @@ export type Book = {
   status: BookStatus;
   rating?: number;
   ratingPrompted?: boolean;
+  review:string;
 };
 
 export type Training = {
